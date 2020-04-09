@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage[magyar]{babel} 
+\usepackage{graphicx} 
+\usepackage[table]{xcolor}
+\usepackage{lastpage}
+\usepackage[version=4]{mhchem}
+\usepackage{chemformula}
+\usepackage{gensymb}
+\usepackage{hhline}
+\usepackage{hyperref}
+\usepackage{indentfirst} %behúzza az elsősort
+\usepackage{geometry}
+
+\title{Önszerveződés-első beadandó}
+\author{Sándor Szende}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+
+Ez a basic verzio, most egy sort adtam hozza.
+
+
+A beadandóhoz a Zachary karate klub hálózatát használtam, amit ezen a veboldalon találtam: http://konect.uni-koblenz.de/networks/ucidata-zachary
+
+\section{Kódrészletek}
+
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Clustering coefficient for the network}}
+\lstset{label={lst:code_direct}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+ID_from=data[:,0] #szetszedem az oszlopokra 
+ID_to=data[:,1]
+
+def adj_matr(ID_from,ID_to):   #Szomszedsagi matrix
+    matrix = np.zeros((len(ID_from),len(ID_to)))
+    for i in range(len(ID_from)):
+        matrix[int(ID_from[i])-1][int(ID_to[i])-1] = 1
+    return matrix
+    
+matr=adj_matr(ID_from,ID_to)    
+
+pd.DataFrame(matr).to_csv("file.csv")
+adat=pd.read_csv("file.csv", index_col=0)
+G=nx.Graph(adat.values) #itt a graf
+
+C=0
+b=0
+for i in range (len(ID_from)-1): #klaszterezesi egyutthato kiszamolasa
+    C+=nx.clustering(G,i)
+    b+=1
+C=nx.average_clustering(G)
+C=0.24873984947514358 #ez az eredeti kalszterezesi egyutthato, 
+#ami osszecseng azzal, amit az oldal ir. (ott 25.6 %) 
+\end{lstlisting}
+
+
+\newpage
+
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Degree distribution pk}}
+\lstset{label={lst:akarmi2}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+
+def get_pk(ID,k): #bekeri az egyik oszlopot(ID_from) es hogy mekkora k-t keresel
+    b = 0
+    for i in range(len(ID)):
+        if ID.count(ID[i]) == k:
+            b+=1
+    return b/len(ID) #megadja az X_k-t
+
+p_k = [get_pk(ID,k) for k in range(0,len(ID))] #itt vegigmegy az osszes k-n
+
+indx = []
+for i in range(len(p_k)):
+    indx.append(i)
+
+p_k2,indx2 = [],[]
+for i in range(len(p_k)):
+    if p_k[i]!=0:
+        p_k2.append(p_k[i])
+        indx2.append(i)
+
+
+figsize(6,4)
+plot(indx2,p_k2,'.',zorder = 10) #plotolom az eloszlast
+plot(indx2,p_k2,zorder = 5)
+grid(True)
+
+title('A $p_k$ eloszlasa',fontsize=20)
+savefig('kep.png')
+
+\end{lstlisting}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.55\textwidth]{kep (1).png}
+\end{figure}
+
+
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Clustering coefficient of generalized graph}}
+\lstset{label={lst:akarmi3}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+k = sum([i*p_k[i] for i in range(len(p_k))]) #k es k^2 varhato erteke
+k2 = sum([i**2*p_k[i] for i in range(len(p_k))])
+
+C = (z/N)*((k2-k)/k**2)**2 #1.23 egyenlet kiszamitasa
+print(C)
+C=0.16632615197423128
+\end{lstlisting}
+
+
+\end{document}

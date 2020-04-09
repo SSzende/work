@@ -1,0 +1,63 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage[magyar]{babel} 
+\usepackage{graphicx} 
+\usepackage[table]{xcolor}
+\usepackage{lastpage}
+\usepackage[version=4]{mhchem}
+\usepackage{chemformula}
+\usepackage{gensymb}
+\usepackage{hhline}
+\usepackage{hyperref}
+\usepackage{indentfirst} %behúzza az elsősort
+\usepackage{geometry}
+
+\title{Önszerveződés-első beadandó}
+\author{Sándor Szende}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Adatok}
+
+A beadandóhoz a Zachary karate klub hálózatát használtam, amit ezen a veboldalon találtam: http://konect.uni-koblenz.de/networks/ucidata-zachary
+
+\section{Kódrészletek}
+
+\lstset{language=Python}
+\lstset{frame=lines}
+\lstset{caption={Clustering coefficient for the network}}
+\lstset{label={lst:code_direct}}
+\lstset{basicstyle=\footnotesize}
+\begin{lstlisting}
+ID_from=data[:,0] #szetszedem az oszlopokra 
+ID_to=data[:,1]
+
+def adj_matr(ID_from,ID_to):   #Szomszedsagi matrix
+    matrix = np.zeros((len(ID_from),len(ID_to)))
+    for i in range(len(ID_from)):
+        matrix[int(ID_from[i])-1][int(ID_to[i])-1] = 1
+    return matrix
+    
+matr=adj_matr(ID_from,ID_to)    
+
+pd.DataFrame(matr).to_csv("file.csv")
+adat=pd.read_csv("file.csv", index_col=0)
+G=nx.Graph(adat.values) #itt a graf
+
+C=0
+b=0
+for i in range (len(ID_from)-1): #klaszterezesi egyutthato kiszamolasa
+    C+=nx.clustering(G,i)
+    b+=1
+C=nx.average_clustering(G)
+C=0.24873984947514358 #ez az eredeti kalszterezesi egyutthato, 
+#ami osszecseng azzal, amit az oldal ir. (ott 25.6 %) 
+\end{lstlisting}
+
+
+\end{document}
